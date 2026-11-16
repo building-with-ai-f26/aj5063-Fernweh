@@ -3,13 +3,18 @@
 > Give this file to your coding agent and check that it is using these instructions. Keep the stack, commands, and ground rules current.
 
 ## 1. Project Overview
-- **What this repo builds:** [1–2 sentence summary]
-- **Primary user & core workflow:** [See the living PRD in `docs/index.html`]
-- **Tech stack:** [e.g., Python 3.12 / FastAPI / Next.js / SQLite / OpenRouter API]
+- **What this repo builds:** Fernweh, a virtual travel agent for friend groups that turns trip details and each friend's profile into restaurant and activity suggestions the group can vote on.
+- **Primary user & core workflow:** The friend who organizes group trips, plus the friends who fill in profiles. See the living PRD in `docs/index.html`.
+- **Tech stack:** Python standard library (`http.server`, `urllib`) for the backend, plain HTML/CSS/JavaScript for the frontend, OpenRouter for the AI model, GitHub Pages for the product page.
+- **Project structure:**
+  - `app.py` — backend server (Python standard library), serves the page and calls OpenRouter with the key from `.env`
+  - `static/index.html` — app frontend (trip form + results page), served by `app.py`
+  - `docs/` — public product page (GitHub Pages)
+  - `trip_prototype.py`, `prototype.py` — earlier terminal throwaway prototypes (Fernweh and Mise), kept for reference
 
 ## 2. Commands
-- **Install dependencies:** `[e.g., npm install / uv sync]`
-- **Run locally:** `[e.g., npm run dev]`
+- **Install dependencies:** None — uses Python's standard library only.
+- **Run locally:** Copy `.env.example` to `.env` and add your OpenRouter API key, then run `python3 app.py`. Open `http://localhost:8000` in your browser. Press Ctrl+C in the terminal to stop the server.
 - **Run deterministic tests:** `[e.g., pytest / npm test]`
 - **Run model evals:** `[e.g., python tests/eval.py]`
 

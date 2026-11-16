@@ -158,12 +158,12 @@
     <section id="live-demo">
       <h2>Product Showcase (Prototype / Live App / 2-Min Video)</h2>
       <p>
-        <strong>Current Status:</strong> Build 1: local prototype (terminal script)<br />
-        <strong>Demo:</strong> Entering trip details and friend profiles into the prototype and getting back group-fit restaurant and activity suggestions.
+        <strong>Current Status:</strong> Build 2: local web app (python3 app.py, then open localhost:8000).<br />
+        <strong>Demo:</strong> Enter trip details and each friend's profile, get 8 restaurants and 8 activities as cards with cost per person, a Google Maps verify link, and thumbs up/down voting.
       </p>
-      <img src="fernweh-prototype.png" alt="Terminal output of the Fernweh prototype suggesting restaurants and activities for a group trip, each labeled unverified with a price level, why it fits the group, and cost per person" style="width: 100%; border-radius: 8px; border: 1px solid var(--border);" />
+      <img src="fernweh-app.png" alt="Fernweh web app showing a trip form and restaurant and activity result cards with price level, why it fits the group, cost per person, a Google Maps verify link, and thumbs up/down voting buttons" style="width: 100%; border-radius: 8px; border: 1px solid var(--border);" />
       <p class="meta">
-        Local prototype — enter destination, dates, group size, budget, vibe, and a profile per friend; get back 8 restaurants and 8 activities, each with a price level, why it fits the group, and a rough cost per person. Add the live cloud app link and two-minute video in Build 5.
+        Enter trip details and each friend's profile, get 8 restaurants and 8 activities as cards with cost per person, a Google Maps verify link, and thumbs up/down voting. Add the live cloud app link and two-minute video in Build 5.
       </p>
     </section>
 
@@ -187,18 +187,27 @@
       </ul>
 
       <h3>3. How It Works Under the Hood & Riskiest Assumption (Week 2+)</h3>
-      <p><strong>Riskiest Assumption:</strong> That AI can suggest real, relevant places that fit a whole group, and that friends will actually take the time to fill out a profile and vote.</p>
-      <p><strong>Simple Architecture:</strong> [User Input] → [Your App / Server] → [AI Model / Tool] → [Output]</p>
+      <p><strong>Riskiest Assumption:</strong> AI can suggest real, relevant places that fit a whole group's mixed preferences.</p>
+      <p><strong>How Build 2 tests it:</strong> I ran a real 2-person Lisbon trip and checked all 16 suggestions on Google Maps. 16 of 16 were real, open, and a good fit. Caveat: one small trip to a well-known city; next I'll test larger groups with more conflicting preferences, less famous destinations, and pod testers' own trips. Thumbs up/down votes will show whether suggestions fit real people.</p>
+      <p><strong>How it works:</strong> Browser form (frontend, static/index.html) → local Python server (backend, app.py, reads the OpenRouter key from .env) → AI model via OpenRouter → JSON back to the browser, shown as cards. The key never reaches the browser.</p>
 
       <h3>4. Unit Economics & Analytics Snapshot (Updated Weekly)</h3>
       <div class="grid-2">
         <div class="stat-box">
           <div class="stat-label">Cumulative Build Spend</div>
-          <div class="stat-value">[Record actual spend]</div>
+          <div class="stat-value">$0.00</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Tokens per Run</div>
+          <div class="stat-value">429 in · 4,472 out (mostly output — the 16 cards)</div>
         </div>
         <div class="stat-box">
           <div class="stat-label">Est. Cost Per User Run</div>
-          <div class="stat-value">[Not yet estimated]</div>
+          <div class="stat-value">$0 (free model) · ~$0.007 on a cheap paid model ($0.50 / $1.50 per M tokens)</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Est. Monthly Cost</div>
+          <div class="stat-value">~$21/mo at 100 runs/day (paid-model estimate)</div>
         </div>
         <div class="stat-box">
           <div class="stat-label">User Evidence (Analytics from Build 2)</div>
@@ -229,9 +238,9 @@
       <div class="log-entry">
         <h3>Build 2 · Smallest Local Version & PostHog (Due Nov 16)</h3>
         <ul>
-          <li><strong>What shipped:</strong> [Local working slice, PostHog verified on this page and the local app, PRD v2, and local setup in AGENTS.md]</li>
-          <li><strong>What broke / changed in PRD:</strong> [Fill in]</li>
-          <li><strong>Cost & time this week:</strong> $[0.00] · [0] hours</li>
+          <li><strong>What shipped:</strong> A local web app where a group's trip details and friend profiles become restaurant and activity cards, with per-person budget, date pickers, destination suggestions, a loading message, a "Fill with example" button, thumbs up/down voting, and Google Maps verify links. Token usage logged per run.</li>
+          <li><strong>What broke / changed in PRD:</strong> Switched to structured JSON output so the app can show cards; risk test passed 16 of 16 on a 2-person trip; output tokens drive cost.</li>
+          <li><strong>Cost & time this week:</strong> $0.00 · 3 hours</li>
         </ul>
       </div>
 

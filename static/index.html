@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fernweh — Build 2 prototype</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --text: #111827;
+    --muted: #4b5563;
+    --border: #e5e7eb;
+    --accent: #1d63dc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 20px 80px; }
+  h1 { margin: 0 0 4px; }
+  .subtitle { color: var(--muted); margin: 0 0 28px; }
+  fieldset {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px 20px;
+    margin: 0 0 16px;
+  }
+  legend { font-weight: 600; padding: 0 6px; }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
+  .field-hint { font-size: 12px; color: var(--muted); margin: 4px 0 0; }
+  input[type="text"], input[type="number"], textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  textarea { min-height: 70px; resize: vertical; }
+  .trip-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0 16px; }
+  .friend-block { border-top: 1px dashed var(--border); padding-top: 12px; margin-top: 12px; }
+  .friend-block:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+  .friend-header { display: flex; justify-content: space-between; align-items: center; }
+  .friend-header strong { font-size: 13px; }
+  button {
+    font-family: inherit;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  button.primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-weight: 600;
+    font-size: 15px;
+  }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .friend-controls { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
+  #status { margin: 16px 0; color: var(--muted); }
+  #error { margin: 16px 0; color: #b91c1c; }
+  .results-section { margin-top: 28px; }
+  .results-section h2 { font-size: 18px; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .card h3 { margin: 0 0 6px; font-size: 15px; }
+  .price { font-size: 13px; color: var(--muted); margin: 0 0 8px; }
+  .why { font-size: 14px; margin: 0 0 8px; }
+  .cost { font-size: 13px; margin: 0 0 10px; }
+  .unverified {
+    display: inline-block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #92400e;
+    background: #fef3c7;
+    border-radius: 999px;
+    padding: 2px 8px;
+    margin-bottom: 8px;
+  }
+  .maps-link { font-size: 13px; }
+  .vote-row { display: flex; gap: 8px; margin-top: 10px; }
+  .vote-btn { font-size: 16px; padding: 4px 10px; }
+  .vote-btn.active.vote-up { background: #dcfce7; border-color: #16a34a; }
+  .vote-btn.active.vote-down { background: #fee2e2; border-color: #dc2626; }
+  #example-btn { margin-bottom: 16px; }
+  #next-up {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 14px;
+  }
+  #next-up h2 { font-size: 15px; color: var(--text); margin: 0 0 8px; }
+  #next-up ul { margin: 0; padding-left: 20px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Fernweh</h1>
+  <p class="subtitle">Build 2 prototype — enter a trip and friend profiles, get group-fit suggestions.</p>
+
+  <button type="button" id="example-btn">Fill with example</button>
+
+  <form id="trip-form">
+    <fieldset>
+      <legend>Trip details</legend>
+      <div class="trip-grid">
+        <div>
+          <label for="destination">Destination</label>
+          <input type="text" id="destination" list="destination-list" autocomplete="off" required />
+          <datalist id="destination-list">
+            <option value="Paris, France"></option>
+            <option value="London, United Kingdom"></option>
+            <option value="Rome, Italy"></option>
+            <option value="Barcelona, Spain"></option>
+            <option value="Madrid, Spain"></option>
+            <option value="Lisbon, Portugal"></option>
+            <option value="Amsterdam, Netherlands"></option>
+            <option value="Berlin, Germany"></option>
+            <option value="Vienna, Austria"></option>
+            <option value="Prague, Czech Republic"></option>
+            <option value="Budapest, Hungary"></option>
+            <option value="Athens, Greece"></option>
+            <option value="Santorini, Greece"></option>
+            <option value="Dubrovnik, Croatia"></option>
+            <option value="Reykjavik, Iceland"></option>
+            <option value="Copenhagen, Denmark"></option>
+            <option value="Stockholm, Sweden"></option>
+            <option value="Oslo, Norway"></option>
+            <option value="Helsinki, Finland"></option>
+            <option value="Zurich, Switzerland"></option>
+            <option value="Venice, Italy"></option>
+            <option value="Florence, Italy"></option>
+            <option value="Milan, Italy"></option>
+            <option value="Naples, Italy"></option>
+            <option value="Seville, Spain"></option>
+            <option value="Porto, Portugal"></option>
+            <option value="Dublin, Ireland"></option>
+            <option value="Edinburgh, United Kingdom"></option>
+            <option value="Brussels, Belgium"></option>
+            <option value="Warsaw, Poland"></option>
+            <option value="Krakow, Poland"></option>
+            <option value="Istanbul, Turkey"></option>
+            <option value="Marrakech, Morocco"></option>
+            <option value="Cairo, Egypt"></option>
+            <option value="Cape Town, South Africa"></option>
+            <option value="Nairobi, Kenya"></option>
+            <option value="Zanzibar, Tanzania"></option>
+            <option value="Tokyo, Japan"></option>
+            <option value="Kyoto, Japan"></option>
+            <option value="Osaka, Japan"></option>
+            <option value="Seoul, South Korea"></option>
+            <option value="Bangkok, Thailand"></option>
+            <option value="Phuket, Thailand"></option>
+            <option value="Chiang Mai, Thailand"></option>
+            <option value="Bali, Indonesia"></option>
+            <option value="Singapore, Singapore"></option>
+            <option value="Kuala Lumpur, Malaysia"></option>
+            <option value="Hanoi, Vietnam"></option>
+            <option value="Ho Chi Minh City, Vietnam"></option>
+            <option value="Siem Reap, Cambodia"></option>
+            <option value="Hong Kong, China"></option>
+            <option value="Shanghai, China"></option>
+            <option value="Beijing, China"></option>
+            <option value="Taipei, Taiwan"></option>
+            <option value="Manila, Philippines"></option>
+            <option value="Mumbai, India"></option>
+            <option value="New Delhi, India"></option>
+            <option value="Goa, India"></option>
+            <option value="Dubai, United Arab Emirates"></option>
+            <option value="Abu Dhabi, United Arab Emirates"></option>
+            <option value="Doha, Qatar"></option>
+            <option value="Tel Aviv, Israel"></option>
+            <option value="Jerusalem, Israel"></option>
+            <option value="New York City, United States"></option>
+            <option value="Los Angeles, United States"></option>
+            <option value="San Francisco, United States"></option>
+            <option value="Las Vegas, United States"></option>
+            <option value="Miami, United States"></option>
+            <option value="Chicago, United States"></option>
+            <option value="New Orleans, United States"></option>
+            <option value="Austin, United States"></option>
+            <option value="Nashville, United States"></option>
+            <option value="Honolulu, United States"></option>
+            <option value="Toronto, Canada"></option>
+            <option value="Vancouver, Canada"></option>
+            <option value="Montreal, Canada"></option>
+            <option value="Mexico City, Mexico"></option>
+            <option value="Cancun, Mexico"></option>
+            <option value="Tulum, Mexico"></option>
+            <option value="Oaxaca, Mexico"></option>
+            <option value="Havana, Cuba"></option>
+            <option value="San Juan, Puerto Rico"></option>
+            <option value="Nassau, Bahamas"></option>
+            <option value="Punta Cana, Dominican Republic"></option>
+            <option value="Bogota, Colombia"></option>
+            <option value="Medellin, Colombia"></option>
+            <option value="Lima, Peru"></option>
+            <option value="Cusco, Peru"></option>
+            <option value="Santiago, Chile"></option>
+            <option value="Buenos Aires, Argentina"></option>
+            <option value="Rio de Janeiro, Brazil"></option>
+            <option value="Sao Paulo, Brazil"></option>
+            <option value="Quito, Ecuador"></option>
+            <option value="Sydney, Australia"></option>
+            <option value="Melbourne, Australia"></option>
+            <option value="Brisbane, Australia"></option>
+            <option value="Auckland, New Zealand"></option>
+            <option value="Queenstown, New Zealand"></option>
+            <option value="Nadi, Fiji"></option>
+            <option value="Bora Bora, French Polynesia"></option>
+            <option value="Male, Maldives"></option>
+            <option value="Victoria, Seychelles"></option>
+            <option value="Port Louis, Mauritius"></option>
+          </datalist>
+        </div>
+        <div>
+          <label for="start_date">Start date</label>
+          <input type="date" id="start_date" required />
+        </div>
+        <div>
+          <label for="end_date">End date</label>
+          <input type="date" id="end_date" required />
+        </div>
+        <div>
+          <label for="group_size">Group size</label>
+          <input type="number" id="group_size" min="1" required />
+        </div>
+        <div>
+          <label for="budget">Budget per person (USD)</label>
+          <input type="number" id="budget" min="0" step="1" required />
+          <p class="field-hint">For the whole trip, not including flights.</p>
+        </div>
+        <div>
+          <label for="vibe">Vibe</label>
+          <input type="text" id="vibe" required />
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Friend profiles (2–6)</legend>
+      <div id="friends"></div>
+      <div class="friend-controls">
+        <button type="button" id="add-friend">+ Add friend</button>
+        <button type="button" id="remove-friend">− Remove friend</button>
+        <span id="friend-count-label" style="font-size: 13px; color: var(--muted);"></span>
+      </div>
+    </fieldset>
+
+    <button type="submit" class="primary" id="submit-btn">Plan our trip</button>
+  </form>
+
+  <div id="status"></div>
+  <div id="error"></div>
+  <div id="results"></div>
+
+  <div id="next-up">
+    <h2>Next up</h2>
+    <ul>
+      <li>Structured profile fields instead of one free-text box per friend</li>
+      <li>Avoiding duplicate suggestions (e.g. two very similar restaurants)</li>
+      <li>A "swap this card" button to regenerate a single suggestion</li>
+      <li>Suggest any destination using a real places service</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  const friendsContainer = document.getElementById("friends");
+  const friendCountLabel = document.getElementById("friend-count-label");
+  const MIN_FRIENDS = 2;
+  const MAX_FRIENDS = 6;
+
+  function friendBlocks() {
+    return friendsContainer.querySelectorAll(".friend-block");
+  }
+
+  function renumberFriends() {
+    friendBlocks().forEach((block, i) => {
+      block.querySelector("strong").textContent = "Friend " + (i + 1);
+    });
+    const count = friendBlocks().length;
+    friendCountLabel.textContent = count + " / " + MAX_FRIENDS + " friends";
+    document.getElementById("add-friend").disabled = count >= MAX_FRIENDS;
+    document.getElementById("remove-friend").disabled = count <= MIN_FRIENDS;
+  }
+
+  function addFriend() {
+    if (friendBlocks().length >= MAX_FRIENDS) return;
+    const div = document.createElement("div");
+    div.className = "friend-block";
+    div.innerHTML =
+      '<div class="friend-header"><strong></strong></div>' +
+      '<label>Budget comfort, food preferences/restrictions, activity interests, energy level, dealbreakers</label>' +
+      '<textarea class="friend-profile" placeholder="e.g. mid-range budget, vegetarian, loves hiking, high energy, no late nights"></textarea>';
+    friendsContainer.appendChild(div);
+    renumberFriends();
+  }
+
+  function removeFriend() {
+    const blocks = friendBlocks();
+    if (blocks.length <= MIN_FRIENDS) return;
+    blocks[blocks.length - 1].remove();
+    renumberFriends();
+  }
+
+  document.getElementById("add-friend").addEventListener("click", addFriend);
+  document.getElementById("remove-friend").addEventListener("click", removeFriend);
+
+  for (let i = 0; i < MIN_FRIENDS; i++) addFriend();
+
+  const startDateInput = document.getElementById("start_date");
+  const endDateInput = document.getElementById("end_date");
+  startDateInput.addEventListener("change", () => {
+    endDateInput.min = startDateInput.value;
+    if (endDateInput.value && endDateInput.value < startDateInput.value) {
+      endDateInput.value = startDateInput.value;
+    }
+  });
+
+  const EXAMPLE_TRIP = {
+    destination: "Lisbon, Portugal",
+    start_date: "2026-03-12",
+    end_date: "2026-03-16",
+    group_size: "4",
+    budget: "600",
+    vibe: "relaxed foodie",
+    friends: [
+      "Mid-range budget, loves seafood, wants chill days, no dealbreakers",
+      "Tighter budget, vegetarian, high energy, wants a hike, dealbreaker: no loud clubs",
+      "Flexible budget, loves wine bars and fancy dinners, medium energy, wants one swanky night out",
+      "Tight budget, night owl, loves live music, dealbreaker: no early mornings",
+    ],
+  };
+
+  document.getElementById("example-btn").addEventListener("click", () => {
+    document.getElementById("destination").value = EXAMPLE_TRIP.destination;
+    document.getElementById("start_date").value = EXAMPLE_TRIP.start_date;
+    document.getElementById("end_date").value = EXAMPLE_TRIP.end_date;
+    endDateInput.min = EXAMPLE_TRIP.start_date;
+    document.getElementById("group_size").value = EXAMPLE_TRIP.group_size;
+    document.getElementById("budget").value = EXAMPLE_TRIP.budget;
+    document.getElementById("vibe").value = EXAMPLE_TRIP.vibe;
+
+    while (friendBlocks().length > 0) friendBlocks()[0].remove();
+    EXAMPLE_TRIP.friends.forEach(() => addFriend());
+    document.querySelectorAll(".friend-profile").forEach((textarea, i) => {
+      textarea.value = EXAMPLE_TRIP.friends[i];
+    });
+  });
+
+  function renderCards(title, items, type) {
+    const section = document.createElement("div");
+    section.className = "results-section";
+    const heading = document.createElement("h2");
+    heading.textContent = title;
+    section.appendChild(heading);
+
+    const grid = document.createElement("div");
+    grid.className = "card-grid";
+    items.forEach((item) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML =
+        '<span class="unverified">Unverified — confirm before booking</span>' +
+        '<h3></h3>' +
+        '<p class="price"></p>' +
+        '<p class="why"></p>' +
+        '<p class="cost"></p>' +
+        '<a class="maps-link" target="_blank" rel="noopener">Verify on Google Maps →</a>' +
+        '<div class="vote-row">' +
+        '<button type="button" class="vote-btn vote-up" aria-label="Thumbs up">👍</button>' +
+        '<button type="button" class="vote-btn vote-down" aria-label="Thumbs down">👎</button>' +
+        '</div>';
+      card.querySelector("h3").textContent = item.name || "Unnamed suggestion";
+      card.querySelector(".price").textContent = item.price_level || "";
+      card.querySelector(".why").textContent = item.why_fits || "";
+      card.querySelector(".cost").textContent = "Rough cost per person: " + (item.cost_per_person || "unknown");
+      card.querySelector(".maps-link").href = item.maps_url || "#";
+
+      const upBtn = card.querySelector(".vote-up");
+      const downBtn = card.querySelector(".vote-down");
+      function castVote(vote, activeBtn, otherBtn) {
+        activeBtn.classList.add("active");
+        otherBtn.classList.remove("active");
+        if (window.posthog) {
+          posthog.capture("suggestion_voted", {
+            place_name: item.name,
+            type: type,
+            vote: vote,
+          });
+        }
+      }
+      upBtn.addEventListener("click", () => castVote("up", upBtn, downBtn));
+      downBtn.addEventListener("click", () => castVote("down", downBtn, upBtn));
+
+      grid.appendChild(card);
+    });
+    section.appendChild(grid);
+    return section;
+  }
+
+  document.getElementById("trip-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const statusEl = document.getElementById("status");
+    const errorEl = document.getElementById("error");
+    const resultsEl = document.getElementById("results");
+    const submitBtn = document.getElementById("submit-btn");
+
+    errorEl.textContent = "";
+    resultsEl.innerHTML = "";
+
+    const startDate = startDateInput.value;
+    const endDate = endDateInput.value;
+    if (endDate < startDate) {
+      errorEl.textContent = "End date can't be before start date.";
+      return;
+    }
+
+    statusEl.textContent = "Planning your trip…";
+    submitBtn.disabled = true;
+
+    const friends = Array.from(document.querySelectorAll(".friend-profile"))
+      .map((t) => t.value.trim())
+      .filter((v) => v.length > 0);
+
+    const payload = {
+      destination: document.getElementById("destination").value.trim(),
+      dates: startDate + " to " + endDate,
+      group_size: document.getElementById("group_size").value.trim(),
+      budget: document.getElementById("budget").value.trim(),
+      vibe: document.getElementById("vibe").value.trim(),
+      friends: friends,
+    };
+
+    try {
+      const res = await fetch("/plan-trip", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      statusEl.textContent = "";
+      submitBtn.disabled = false;
+
+      if (!res.ok) {
+        errorEl.textContent = data.error || "Something went wrong.";
+        return;
+      }
+
+      resultsEl.appendChild(renderCards("Restaurants", data.restaurants || [], "restaurant"));
+      resultsEl.appendChild(renderCards("Activities", data.activities || [], "activity"));
+    } catch (err) {
+      statusEl.textContent = "";
+      submitBtn.disabled = false;
+      errorEl.textContent = "Could not reach the server: " + err.message;
+    }
+  });
+</script>
+</body>
+</html>
