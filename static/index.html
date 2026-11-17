@@ -11,280 +11,565 @@
         person_profiles: 'identified_only',
     })
 </script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #fafafa;
+    --ivory: #faf7f1;
+    --ivory-deep: #f1ead9;
+    --ink: #1a1816;
+    --muted: #6b6258;
+    --brass: #9c8752;
+    --brass-dark: #7d6a3f;
     --card: #ffffff;
-    --text: #111827;
-    --muted: #4b5563;
-    --border: #e5e7eb;
-    --accent: #1d63dc;
+    --border: #e4ddcd;
+    --shadow: rgba(26, 24, 22, 0.08);
   }
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.5;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--ivory);
+    color: var(--ink);
+    line-height: 1.6;
   }
-  .container { max-width: 900px; margin: 0 auto; padding: 32px 20px 80px; }
-  h1 { margin: 0 0 4px; }
-  .subtitle { color: var(--muted); margin: 0 0 28px; }
-  fieldset {
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px 20px 20px;
-    margin: 0 0 16px;
+  h1, h2, h3, legend {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 500;
+    color: var(--ink);
   }
-  legend { font-weight: 600; padding: 0 6px; }
-  label { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
-  .field-hint { font-size: 12px; color: var(--muted); margin: 4px 0 0; }
-  input[type="text"], input[type="number"], textarea {
-    width: 100%;
-    padding: 8px 10px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-size: 14px;
-    font-family: inherit;
+
+  /* Hero */
+  .hero {
+    position: relative;
+    min-height: 90vh;
+    background-image: url('https://images.unsplash.com/photo-1758448756167-88dc934c58e4?fm=jpg&q=70&w=2400&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
-  textarea { min-height: 70px; resize: vertical; }
-  .trip-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0 16px; }
-  .friend-block { border-top: 1px dashed var(--border); padding-top: 12px; margin-top: 12px; }
-  .friend-block:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
-  .friend-header { display: flex; justify-content: space-between; align-items: center; }
-  .friend-header strong { font-size: 13px; }
-  button {
-    font-family: inherit;
-    font-size: 14px;
-    border-radius: 6px;
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(12, 10, 8, 0.4) 0%, rgba(12, 10, 8, 0.5) 55%, rgba(12, 10, 8, 0.68) 100%);
+  }
+  .hero-content { position: relative; z-index: 1; padding: 0 24px; max-width: 620px; }
+  .hero-label {
+    font-size: 13px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: #fff;
+    margin: 0 0 20px;
+    font-weight: 600;
+  }
+  .hero-headline {
+    font-size: 44px;
+    line-height: 1.22;
+    margin: 0 0 32px;
+    color: #fff;
+    font-weight: 500;
+  }
+  .hero-cta {
+    display: inline-block;
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    color: #fff;
+    text-decoration: none;
+    padding: 13px 32px;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transition: background 0.2s ease;
+  }
+  .hero-cta:hover { background: rgba(255, 255, 255, 0.14); }
+  .photo-credit {
+    position: absolute;
+    bottom: 16px;
+    right: 20px;
+    z-index: 1;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.72);
+  }
+  .photo-credit a { color: rgba(255, 255, 255, 0.92); }
+
+  .container { max-width: 680px; margin: 0 auto; padding: 72px 24px 100px; }
+  .section-label {
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--brass-dark);
+    font-weight: 600;
+    margin: 0 0 10px;
+  }
+  .subtitle { color: var(--muted); margin: 0 0 40px; font-size: 15px; }
+
+  .btn-ghost {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: none;
     border: 1px solid var(--border);
-    background: var(--card);
-    padding: 6px 12px;
+    border-radius: 2px;
+    padding: 11px 22px;
     cursor: pointer;
   }
-  button.primary {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    font-weight: 600;
-    font-size: 15px;
+  .btn-ghost:hover { border-color: var(--brass); color: var(--brass-dark); }
+  #example-btn { margin-bottom: 30px; }
+
+  fieldset {
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 32px 34px 34px;
+    margin: 0;
+    background: var(--card);
   }
-  button:disabled { opacity: 0.5; cursor: not-allowed; }
-  .friend-controls { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
-  #status { margin: 16px 0; color: var(--muted); }
-  #error { margin: 16px 0; color: #b91c1c; }
-  .results-section { margin-top: 28px; }
-  .results-section h2 { font-size: 18px; }
-  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  legend {
+    font-weight: 500;
+    font-size: 20px;
+    padding: 0 10px;
+  }
+  label { display: block; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 16px 0 6px; font-weight: 600; }
+  .field-hint { font-size: 12px; color: var(--muted); margin: 5px 0 0; font-style: italic; text-transform: none; letter-spacing: normal; }
+  input[type="text"], input[type="number"], input[type="date"], textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    background: #fff;
+    color: var(--ink);
+  }
+  input:focus, textarea:focus { outline: 1px solid var(--brass); outline-offset: 1px; }
+  textarea { min-height: 70px; resize: vertical; }
+  .trip-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0 18px; }
+  .friend-block { border-top: 1px solid var(--border); padding-top: 18px; margin-top: 18px; }
+  .friend-block:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+  .friend-header { display: flex; justify-content: space-between; align-items: center; }
+  .friend-header strong {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brass-dark);
+    font-weight: 700;
+  }
+
+  button { font-family: 'Inter', sans-serif; cursor: pointer; }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  .friend-controls { display: flex; gap: 10px; align-items: center; margin-top: 18px; flex-wrap: wrap; }
+  #add-friend, #remove-friend {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    background: #fff;
+    padding: 9px 16px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  #add-friend:hover, #remove-friend:hover { border-color: var(--brass); }
+  #friend-count-label { font-size: 12px; color: var(--muted); }
+
+  /* Step wizard */
+  .wizard { margin-top: 0; }
+  .step-label {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--brass-dark);
+    margin: 0 0 12px;
+    font-weight: 600;
+  }
+  .step-label strong { color: var(--ink); }
+  .progress-track {
+    height: 2px;
+    background: var(--border);
+    overflow: hidden;
+    margin: 0 0 34px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--brass);
+    transition: width 0.3s ease;
+    width: 25%;
+  }
+  .form-step { display: none; }
+  .form-step.active { display: block; }
+  .review-summary {
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--ivory-deep);
+    border-radius: 2px;
+    padding: 16px 18px;
+    margin: 4px 0 4px;
+  }
+  .step-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 28px;
+    gap: 14px;
+  }
+  .btn-primary, #submit-btn {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 2px;
+    padding: 13px 30px;
+    background: var(--brass);
+    color: #fff;
+  }
+  .btn-primary:hover, #submit-btn:hover { background: var(--brass-dark); }
+  #step-back {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: none;
+    background: none;
+    color: var(--muted);
+    padding: 10px 6px;
+  }
+  #step-back:hover { color: var(--ink); }
+  #step-back:disabled { visibility: hidden; }
+
+  #status { margin: 20px 0; color: var(--muted); font-style: italic; }
+  #error { margin: 20px 0; color: var(--brass-dark); font-weight: 600; }
+  .results-section { margin-top: 56px; }
+  .results-section h2 { font-size: 23px; margin-bottom: 20px; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 24px 20px; }
   .card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 16px;
+    border-radius: 2px;
+    padding: 22px 24px;
+    box-shadow: 0 1px 3px var(--shadow);
   }
-  .card h3 { margin: 0 0 6px; font-size: 15px; }
-  .price { font-size: 13px; color: var(--muted); margin: 0 0 8px; }
-  .why { font-size: 14px; margin: 0 0 8px; }
-  .cost { font-size: 13px; margin: 0 0 10px; }
+  .card-photo {
+    display: block;
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    margin: -22px -24px 16px;
+    width: calc(100% + 48px);
+  }
+  .photo-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 16px;
+  }
+  .photo-credit-line { font-size: 10px; color: var(--muted); margin: 14px 0 0; }
+  .photo-credit-line a { color: var(--muted); text-decoration: underline; text-decoration-color: var(--border); }
+  .card h3 { margin: 2px 0 10px; font-size: 19px; font-weight: 500; }
+  .price {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brass-dark);
+    margin: 0 0 12px;
+  }
+  .why { font-size: 14px; margin: 0 0 14px; color: var(--ink); line-height: 1.55; }
+  .cost {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-weight: 600;
+  }
   .unverified {
     display: inline-block;
-    font-size: 11px;
+    font-size: 10px;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: #92400e;
-    background: #fef3c7;
-    border-radius: 999px;
-    padding: 2px 8px;
-    margin-bottom: 8px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 3px 9px;
+    margin-bottom: 14px;
   }
-  .maps-link { font-size: 13px; }
-  .vote-row { display: flex; gap: 8px; margin-top: 10px; }
-  .vote-btn { font-size: 16px; padding: 4px 10px; }
-  .vote-btn.active.vote-up { background: #dcfce7; border-color: #16a34a; }
-  .vote-btn.active.vote-down { background: #fee2e2; border-color: #dc2626; }
-  #example-btn { margin-bottom: 16px; }
+  .maps-link {
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: var(--border);
+    text-underline-offset: 3px;
+  }
+  .maps-link:hover { text-decoration-color: var(--brass); }
+  .vote-row { display: flex; gap: 8px; margin-top: 16px; }
+  .vote-btn {
+    font-size: 16px;
+    padding: 6px 13px;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    background: #fff;
+  }
+  .vote-btn.active { background: var(--ivory-deep); border-color: var(--brass); }
+
   #next-up {
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border);
+    margin-top: 60px;
+    padding: 28px 30px;
+    border: 1px solid var(--border);
     color: var(--muted);
     font-size: 14px;
   }
-  #next-up h2 { font-size: 15px; color: var(--text); margin: 0 0 8px; }
+  #next-up h2 { font-size: 16px; color: var(--ink); margin: 0 0 12px; }
   #next-up ul { margin: 0; padding-left: 20px; }
+  #next-up li { margin-bottom: 5px; }
+
+  /* Fade-in on scroll / reveal */
+  .fade-section {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-section.visible { opacity: 1; transform: none; }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+  }
+  .fade-in { animation: fadeInUp 0.5s ease both; }
+  @media (prefers-reduced-motion: reduce) {
+    .fade-section { transition: none; opacity: 1; transform: none; }
+    .fade-in { animation: none; }
+  }
+
+  @media (max-width: 640px) {
+    .hero { min-height: 68vh; }
+    .hero-headline { font-size: 30px; }
+    .hero-label { letter-spacing: 0.22em; }
+    .container { padding: 48px 16px 70px; }
+    fieldset { padding: 24px 18px 26px; }
+    .trip-grid { grid-template-columns: 1fr; }
+    .card-grid { grid-template-columns: 1fr; }
+    .step-nav { flex-direction: row-reverse; justify-content: space-between; }
+    .btn-primary, #submit-btn, .btn-ghost, #step-back { min-height: 44px; }
+    .btn-primary, #submit-btn { flex: 1; }
+    #add-friend, #remove-friend { flex: 1; min-height: 40px; text-align: center; }
+    .vote-btn { min-height: 44px; min-width: 44px; font-size: 18px; }
+  }
 </style>
 </head>
 <body>
+  <div class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <p class="hero-label">Fernweh</p>
+      <h1 class="hero-headline">Plan a trip your friends will actually agree on</h1>
+      <a href="#trip-form" class="hero-cta">Start Planning ↓</a>
+    </div>
+    <p class="photo-credit">Photo by <a href="https://unsplash.com/@aalolens" target="_blank" rel="noopener">Aalo Lens</a> on <a href="https://unsplash.com/photos/luxury-infinity-pool-at-sunset-with-lounge-chairs-KgybDitNR18" target="_blank" rel="noopener">Unsplash</a></p>
+  </div>
+
 <div class="container">
-  <h1>Fernweh</h1>
-  <p class="subtitle">Build 2 prototype — enter a trip and friend profiles, get group-fit suggestions.</p>
+  <p class="section-label">Build 2 Prototype</p>
+  <p class="subtitle">Enter a trip and friend profiles, get group-fit suggestions.</p>
 
-  <button type="button" id="example-btn">Fill with example</button>
+  <button type="button" id="example-btn" class="btn-ghost">Fill with example</button>
 
-  <form id="trip-form">
-    <fieldset>
-      <legend>Trip details</legend>
-      <div class="trip-grid">
-        <div>
-          <label for="destination">Destination</label>
-          <input type="text" id="destination" list="destination-list" autocomplete="off" required />
-          <datalist id="destination-list">
-            <option value="Paris, France"></option>
-            <option value="London, United Kingdom"></option>
-            <option value="Rome, Italy"></option>
-            <option value="Barcelona, Spain"></option>
-            <option value="Madrid, Spain"></option>
-            <option value="Lisbon, Portugal"></option>
-            <option value="Amsterdam, Netherlands"></option>
-            <option value="Berlin, Germany"></option>
-            <option value="Vienna, Austria"></option>
-            <option value="Prague, Czech Republic"></option>
-            <option value="Budapest, Hungary"></option>
-            <option value="Athens, Greece"></option>
-            <option value="Santorini, Greece"></option>
-            <option value="Dubrovnik, Croatia"></option>
-            <option value="Reykjavik, Iceland"></option>
-            <option value="Copenhagen, Denmark"></option>
-            <option value="Stockholm, Sweden"></option>
-            <option value="Oslo, Norway"></option>
-            <option value="Helsinki, Finland"></option>
-            <option value="Zurich, Switzerland"></option>
-            <option value="Venice, Italy"></option>
-            <option value="Florence, Italy"></option>
-            <option value="Milan, Italy"></option>
-            <option value="Naples, Italy"></option>
-            <option value="Seville, Spain"></option>
-            <option value="Porto, Portugal"></option>
-            <option value="Dublin, Ireland"></option>
-            <option value="Edinburgh, United Kingdom"></option>
-            <option value="Brussels, Belgium"></option>
-            <option value="Warsaw, Poland"></option>
-            <option value="Krakow, Poland"></option>
-            <option value="Istanbul, Turkey"></option>
-            <option value="Marrakech, Morocco"></option>
-            <option value="Cairo, Egypt"></option>
-            <option value="Cape Town, South Africa"></option>
-            <option value="Nairobi, Kenya"></option>
-            <option value="Zanzibar, Tanzania"></option>
-            <option value="Tokyo, Japan"></option>
-            <option value="Kyoto, Japan"></option>
-            <option value="Osaka, Japan"></option>
-            <option value="Seoul, South Korea"></option>
-            <option value="Bangkok, Thailand"></option>
-            <option value="Phuket, Thailand"></option>
-            <option value="Chiang Mai, Thailand"></option>
-            <option value="Bali, Indonesia"></option>
-            <option value="Singapore, Singapore"></option>
-            <option value="Kuala Lumpur, Malaysia"></option>
-            <option value="Hanoi, Vietnam"></option>
-            <option value="Ho Chi Minh City, Vietnam"></option>
-            <option value="Siem Reap, Cambodia"></option>
-            <option value="Hong Kong, China"></option>
-            <option value="Shanghai, China"></option>
-            <option value="Beijing, China"></option>
-            <option value="Taipei, Taiwan"></option>
-            <option value="Manila, Philippines"></option>
-            <option value="Mumbai, India"></option>
-            <option value="New Delhi, India"></option>
-            <option value="Goa, India"></option>
-            <option value="Dubai, United Arab Emirates"></option>
-            <option value="Abu Dhabi, United Arab Emirates"></option>
-            <option value="Doha, Qatar"></option>
-            <option value="Tel Aviv, Israel"></option>
-            <option value="Jerusalem, Israel"></option>
-            <option value="New York City, United States"></option>
-            <option value="Los Angeles, United States"></option>
-            <option value="San Francisco, United States"></option>
-            <option value="Las Vegas, United States"></option>
-            <option value="Miami, United States"></option>
-            <option value="Chicago, United States"></option>
-            <option value="New Orleans, United States"></option>
-            <option value="Austin, United States"></option>
-            <option value="Nashville, United States"></option>
-            <option value="Honolulu, United States"></option>
-            <option value="Toronto, Canada"></option>
-            <option value="Vancouver, Canada"></option>
-            <option value="Montreal, Canada"></option>
-            <option value="Mexico City, Mexico"></option>
-            <option value="Cancun, Mexico"></option>
-            <option value="Tulum, Mexico"></option>
-            <option value="Oaxaca, Mexico"></option>
-            <option value="Havana, Cuba"></option>
-            <option value="San Juan, Puerto Rico"></option>
-            <option value="Nassau, Bahamas"></option>
-            <option value="Punta Cana, Dominican Republic"></option>
-            <option value="Bogota, Colombia"></option>
-            <option value="Medellin, Colombia"></option>
-            <option value="Lima, Peru"></option>
-            <option value="Cusco, Peru"></option>
-            <option value="Santiago, Chile"></option>
-            <option value="Buenos Aires, Argentina"></option>
-            <option value="Rio de Janeiro, Brazil"></option>
-            <option value="Sao Paulo, Brazil"></option>
-            <option value="Quito, Ecuador"></option>
-            <option value="Sydney, Australia"></option>
-            <option value="Melbourne, Australia"></option>
-            <option value="Brisbane, Australia"></option>
-            <option value="Auckland, New Zealand"></option>
-            <option value="Queenstown, New Zealand"></option>
-            <option value="Nadi, Fiji"></option>
-            <option value="Bora Bora, French Polynesia"></option>
-            <option value="Male, Maldives"></option>
-            <option value="Victoria, Seychelles"></option>
-            <option value="Port Louis, Mauritius"></option>
-          </datalist>
-        </div>
-        <div>
-          <label for="start_date">Start date</label>
-          <input type="date" id="start_date" required />
-        </div>
-        <div>
-          <label for="end_date">End date</label>
-          <input type="date" id="end_date" required />
-        </div>
-        <div>
-          <label for="group_size">Group size</label>
-          <input type="number" id="group_size" min="1" required />
-        </div>
-        <div>
-          <label for="budget">Budget per person (USD)</label>
-          <input type="number" id="budget" min="0" step="1" required />
-          <p class="field-hint">For the whole trip, not including flights.</p>
-        </div>
-        <div>
-          <label for="vibe">Vibe</label>
-          <input type="text" id="vibe" required />
-        </div>
-      </div>
-    </fieldset>
+  <form id="trip-form" class="wizard fade-section">
+    <p class="step-label" id="step-label">Step <strong>1</strong> of 4 — Where &amp; When</p>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
 
-    <fieldset>
-      <legend>Friend profiles (2–6)</legend>
-      <div id="friends"></div>
-      <div class="friend-controls">
-        <button type="button" id="add-friend">+ Add friend</button>
-        <button type="button" id="remove-friend">− Remove friend</button>
-        <span id="friend-count-label" style="font-size: 13px; color: var(--muted);"></span>
-      </div>
-    </fieldset>
+    <div class="form-step active" data-step="1">
+      <fieldset>
+        <legend>Where &amp; When</legend>
+        <div class="trip-grid">
+          <div>
+            <label for="destination">Destination</label>
+            <input type="text" id="destination" list="destination-list" autocomplete="off" required />
+            <datalist id="destination-list">
+              <option value="Paris, France"></option>
+              <option value="London, United Kingdom"></option>
+              <option value="Rome, Italy"></option>
+              <option value="Barcelona, Spain"></option>
+              <option value="Madrid, Spain"></option>
+              <option value="Lisbon, Portugal"></option>
+              <option value="Amsterdam, Netherlands"></option>
+              <option value="Berlin, Germany"></option>
+              <option value="Vienna, Austria"></option>
+              <option value="Prague, Czech Republic"></option>
+              <option value="Budapest, Hungary"></option>
+              <option value="Athens, Greece"></option>
+              <option value="Santorini, Greece"></option>
+              <option value="Dubrovnik, Croatia"></option>
+              <option value="Reykjavik, Iceland"></option>
+              <option value="Copenhagen, Denmark"></option>
+              <option value="Stockholm, Sweden"></option>
+              <option value="Oslo, Norway"></option>
+              <option value="Helsinki, Finland"></option>
+              <option value="Zurich, Switzerland"></option>
+              <option value="Venice, Italy"></option>
+              <option value="Florence, Italy"></option>
+              <option value="Milan, Italy"></option>
+              <option value="Naples, Italy"></option>
+              <option value="Seville, Spain"></option>
+              <option value="Porto, Portugal"></option>
+              <option value="Dublin, Ireland"></option>
+              <option value="Edinburgh, United Kingdom"></option>
+              <option value="Brussels, Belgium"></option>
+              <option value="Warsaw, Poland"></option>
+              <option value="Krakow, Poland"></option>
+              <option value="Istanbul, Turkey"></option>
+              <option value="Marrakech, Morocco"></option>
+              <option value="Cairo, Egypt"></option>
+              <option value="Cape Town, South Africa"></option>
+              <option value="Nairobi, Kenya"></option>
+              <option value="Zanzibar, Tanzania"></option>
+              <option value="Tokyo, Japan"></option>
+              <option value="Kyoto, Japan"></option>
+              <option value="Osaka, Japan"></option>
+              <option value="Seoul, South Korea"></option>
+              <option value="Bangkok, Thailand"></option>
+              <option value="Phuket, Thailand"></option>
+              <option value="Chiang Mai, Thailand"></option>
+              <option value="Bali, Indonesia"></option>
+              <option value="Singapore, Singapore"></option>
+              <option value="Kuala Lumpur, Malaysia"></option>
+              <option value="Hanoi, Vietnam"></option>
+              <option value="Ho Chi Minh City, Vietnam"></option>
+              <option value="Siem Reap, Cambodia"></option>
+              <option value="Hong Kong, China"></option>
+              <option value="Shanghai, China"></option>
+              <option value="Beijing, China"></option>
+              <option value="Taipei, Taiwan"></option>
+              <option value="Manila, Philippines"></option>
+              <option value="Mumbai, India"></option>
+              <option value="New Delhi, India"></option>
+              <option value="Goa, India"></option>
+              <option value="Dubai, United Arab Emirates"></option>
+              <option value="Abu Dhabi, United Arab Emirates"></option>
+              <option value="Doha, Qatar"></option>
+              <option value="Tel Aviv, Israel"></option>
+              <option value="Jerusalem, Israel"></option>
+              <option value="New York City, United States"></option>
+              <option value="Los Angeles, United States"></option>
+              <option value="San Francisco, United States"></option>
+              <option value="Las Vegas, United States"></option>
+              <option value="Miami, United States"></option>
+              <option value="Chicago, United States"></option>
+              <option value="New Orleans, United States"></option>
+              <option value="Austin, United States"></option>
+              <option value="Nashville, United States"></option>
+              <option value="Honolulu, United States"></option>
+              <option value="Toronto, Canada"></option>
+              <option value="Vancouver, Canada"></option>
+              <option value="Montreal, Canada"></option>
+              <option value="Mexico City, Mexico"></option>
+              <option value="Cancun, Mexico"></option>
+              <option value="Tulum, Mexico"></option>
+              <option value="Oaxaca, Mexico"></option>
+              <option value="Havana, Cuba"></option>
+              <option value="San Juan, Puerto Rico"></option>
+              <option value="Nassau, Bahamas"></option>
+              <option value="Punta Cana, Dominican Republic"></option>
+              <option value="Bogota, Colombia"></option>
+              <option value="Medellin, Colombia"></option>
+              <option value="Lima, Peru"></option>
+              <option value="Cusco, Peru"></option>
+              <option value="Santiago, Chile"></option>
+              <option value="Buenos Aires, Argentina"></option>
+              <option value="Rio de Janeiro, Brazil"></option>
+              <option value="Sao Paulo, Brazil"></option>
+              <option value="Quito, Ecuador"></option>
+              <option value="Sydney, Australia"></option>
+              <option value="Melbourne, Australia"></option>
+              <option value="Brisbane, Australia"></option>
+              <option value="Auckland, New Zealand"></option>
+              <option value="Queenstown, New Zealand"></option>
+              <option value="Nadi, Fiji"></option>
+              <option value="Bora Bora, French Polynesia"></option>
+              <option value="Male, Maldives"></option>
+              <option value="Victoria, Seychelles"></option>
+              <option value="Port Louis, Mauritius"></option>
+            </datalist>
+          </div>
+          <div>
+            <label for="start_date">Start date</label>
+            <input type="date" id="start_date" required />
+          </div>
+          <div>
+            <label for="end_date">End date</label>
+            <input type="date" id="end_date" required />
+          </div>
+        </div>
+      </fieldset>
+    </div>
 
-    <button type="submit" class="primary" id="submit-btn">Plan our trip</button>
+    <div class="form-step" data-step="2">
+      <fieldset>
+        <legend>Who &amp; How Much</legend>
+        <div class="trip-grid">
+          <div>
+            <label for="group_size">Group size</label>
+            <input type="number" id="group_size" min="1" required />
+          </div>
+          <div>
+            <label for="budget">Budget per person (USD)</label>
+            <input type="number" id="budget" min="0" step="1" required />
+            <p class="field-hint">For the whole trip, not including flights.</p>
+          </div>
+          <div>
+            <label for="vibe">Vibe</label>
+            <input type="text" id="vibe" required />
+          </div>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="form-step" data-step="3">
+      <fieldset>
+        <legend>Your Friends (2–6)</legend>
+        <div id="friends"></div>
+        <div class="friend-controls">
+          <button type="button" id="add-friend">+ Add friend</button>
+          <button type="button" id="remove-friend">− Remove friend</button>
+          <span id="friend-count-label"></span>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="form-step" data-step="4">
+      <fieldset>
+        <legend>Review &amp; Go</legend>
+        <p class="review-summary" id="review-summary"></p>
+        <p class="field-hint">Looks good? Plan the trip below.</p>
+      </fieldset>
+    </div>
+
+    <div class="step-nav">
+      <button type="button" id="step-back" class="btn-ghost">Back</button>
+      <button type="button" id="step-next" class="btn-primary">Next</button>
+      <button type="submit" class="primary" id="submit-btn" style="display: none;">Plan our trip</button>
+    </div>
   </form>
 
   <div id="status"></div>
   <div id="error"></div>
   <div id="results"></div>
 
-  <div id="next-up">
+  <div id="next-up" class="fade-section">
     <h2>Next up</h2>
-    <ul>
-      <li>Structured profile fields instead of one free-text box per friend</li>
-      <li>Avoiding duplicate suggestions (e.g. two very similar restaurants)</li>
-      <li>A "swap this card" button to regenerate a single suggestion</li>
-      <li>Suggest any destination using a real places service</li>
-    </ul>
+    <p>Structured friend profiles, hotel suggestions, a group decision view, and veto tokens are next for Build 3 — see the full <a href="https://github.com/building-with-ai-f26/aj5063-Fernweh/blob/main/ROADMAP.md" target="_blank" rel="noopener">roadmap</a> for what's planned through Build 5.</p>
   </div>
 </div>
 
@@ -370,21 +655,105 @@
     document.querySelectorAll(".friend-profile").forEach((textarea, i) => {
       textarea.value = EXAMPLE_TRIP.friends[i];
     });
+
+    showStep(1);
   });
+
+  // --- Step wizard ---
+  const steps = Array.from(document.querySelectorAll(".form-step"));
+  const totalSteps = steps.length;
+  const stepLabels = ["Where & When", "Who & How Much", "Your Friends", "Review & Go"];
+  let currentStep = 1;
+
+  function updateReviewSummary() {
+    const el = document.getElementById("review-summary");
+    if (!el) return;
+    const dest = document.getElementById("destination").value || "—";
+    const sd = document.getElementById("start_date").value || "—";
+    const ed = document.getElementById("end_date").value || "—";
+    const gs = document.getElementById("group_size").value || "—";
+    const bud = document.getElementById("budget").value || "—";
+    const vibe = document.getElementById("vibe").value || "—";
+    const friendCount = friendBlocks().length;
+    el.textContent =
+      dest + " · " + sd + " to " + ed + " · " + gs + " people · $" + bud + "/person · " +
+      vibe + " · " + friendCount + " friend profiles";
+  }
+
+  function showStep(n) {
+    currentStep = n;
+    steps.forEach((s) => {
+      s.classList.toggle("active", parseInt(s.dataset.step, 10) === n);
+    });
+    document.getElementById("step-label").innerHTML =
+      "Step <strong>" + n + "</strong> of " + totalSteps + " — " + stepLabels[n - 1];
+    document.getElementById("progress-fill").style.width = (n / totalSteps) * 100 + "%";
+    document.getElementById("step-back").disabled = n === 1;
+    document.getElementById("step-next").style.display = n === totalSteps ? "none" : "inline-block";
+    document.getElementById("submit-btn").style.display = n === totalSteps ? "inline-block" : "none";
+    if (n === totalSteps) updateReviewSummary();
+
+    const activeStep = steps[n - 1];
+    activeStep.classList.remove("fade-in");
+    void activeStep.offsetWidth;
+    activeStep.classList.add("fade-in");
+  }
+
+  function validateStep(n) {
+    const stepEl = steps[n - 1];
+    const requiredFields = stepEl.querySelectorAll("[required]");
+    for (const f of requiredFields) {
+      if (!f.value) return false;
+    }
+    return true;
+  }
+
+  document.getElementById("step-next").addEventListener("click", () => {
+    const errorEl = document.getElementById("error");
+    if (!validateStep(currentStep)) {
+      errorEl.textContent = "Please fill in all fields before continuing.";
+      return;
+    }
+    errorEl.textContent = "";
+    if (currentStep < totalSteps) showStep(currentStep + 1);
+  });
+
+  document.getElementById("step-back").addEventListener("click", () => {
+    if (currentStep > 1) showStep(currentStep - 1);
+  });
+
+  showStep(1);
+
+  // --- Fade-in on scroll ---
+  const revealObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.1 }
+  );
+  document.querySelectorAll(".fade-section").forEach((el) => revealObserver.observe(el));
 
   function renderCards(title, items, type) {
     const section = document.createElement("div");
-    section.className = "results-section";
+    section.className = "results-section fade-section";
     const heading = document.createElement("h2");
     heading.textContent = title;
     section.appendChild(heading);
 
     const grid = document.createElement("div");
     grid.className = "card-grid";
-    items.forEach((item) => {
+    items.forEach((item, i) => {
       const card = document.createElement("div");
-      card.className = "card";
+      card.className = "card fade-in";
+      card.style.animationDelay = i * 0.05 + "s";
       card.innerHTML =
+        '<img class="card-photo" />' +
+        '<p class="photo-label">Representative image</p>' +
         '<span class="unverified">Unverified — confirm before booking</span>' +
         '<h3></h3>' +
         '<p class="price"></p>' +
@@ -394,12 +763,21 @@
         '<div class="vote-row">' +
         '<button type="button" class="vote-btn vote-up" aria-label="Thumbs up">👍</button>' +
         '<button type="button" class="vote-btn vote-down" aria-label="Thumbs down">👎</button>' +
-        '</div>';
+        '</div>' +
+        '<p class="photo-credit-line"></p>';
+      card.querySelector(".card-photo").src = item.photo_url || "";
+      card.querySelector(".card-photo").alt = (item.name || "Suggestion") + " — representative photo";
       card.querySelector("h3").textContent = item.name || "Unnamed suggestion";
       card.querySelector(".price").textContent = item.price_level || "";
       card.querySelector(".why").textContent = item.why_fits || "";
       card.querySelector(".cost").textContent = "Rough cost per person: " + (item.cost_per_person || "unknown");
       card.querySelector(".maps-link").href = item.maps_url || "#";
+      const creditEl = card.querySelector(".photo-credit-line");
+      if (item.photo_credit_name && item.photo_credit_url) {
+        creditEl.innerHTML =
+          'Photo by <a href="' + item.photo_credit_url + '" target="_blank" rel="noopener">' +
+          item.photo_credit_name + '</a> on Unsplash';
+      }
 
       const upBtn = card.querySelector(".vote-up");
       const downBtn = card.querySelector(".vote-down");
@@ -420,11 +798,18 @@
       grid.appendChild(card);
     });
     section.appendChild(grid);
+    revealObserver.observe(section);
     return section;
   }
 
   document.getElementById("trip-form").addEventListener("submit", async (e) => {
     e.preventDefault();
+
+    if (currentStep < totalSteps) {
+      document.getElementById("step-next").click();
+      return;
+    }
+
     if (window.posthog) posthog.capture("plan_trip_clicked");
     const statusEl = document.getElementById("status");
     const errorEl = document.getElementById("error");

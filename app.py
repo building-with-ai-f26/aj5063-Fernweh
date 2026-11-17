@@ -22,6 +22,11 @@ API_URL = "https://openrouter.ai/api/v1/chat/completions"
 PORT = 8000
 STATIC_FILE = os.path.join("static", "index.html")
 
+CATEGORIES = [
+    "fine dining", "wine bar", "cafe", "seafood", "tapas", "market",
+    "walking tour", "museum", "viewpoint", "nightlife", "cooking class", "beach",
+]
+
 SYSTEM_PROMPT = """You are Fernweh, a virtual travel agent for friend groups. You are given \
 trip details (destination, dates, group size, budget, vibe) and a short profile from each \
 friend in the group (budget comfort, food preferences/restrictions, activity interests, \
@@ -35,16 +40,20 @@ something whose cost per person alone would exceed the group's stated budget.
 Suggest exactly 8 restaurants and 8 activities in the destination that fit the whole group, \
 balancing everyone's profiles, not just one person's.
 
+Every suggestion must also include a "category" field: exactly one of these 12 values, \
+whichever best matches the suggestion: """ + ", ".join(CATEGORIES) + """. This is used to \
+pick a representative stock photo, so choose the closest match even if imperfect.
+
 Respond with ONLY a single JSON object, no markdown code fences, no commentary, matching \
 exactly this shape:
 
 {
   "restaurants": [
-    {"name": "...", "price_level": "$ to $$$$", "why_fits": "one sentence referencing specific profile details", "cost_per_person": "..."},
+    {"name": "...", "price_level": "$ to $$$$", "why_fits": "one sentence referencing specific profile details", "cost_per_person": "...", "category": "one of the 12 categories above"},
     ... exactly 8 items
   ],
   "activities": [
-    {"name": "...", "price_level": "$ to $$$$", "why_fits": "one sentence referencing specific profile details", "cost_per_person": "..."},
+    {"name": "...", "price_level": "$ to $$$$", "why_fits": "one sentence referencing specific profile details", "cost_per_person": "...", "category": "one of the 12 categories above"},
     ... exactly 8 items
   ]
 }"""
@@ -117,6 +126,83 @@ def add_maps_links(items, destination):
     for item in items:
         query = urllib.parse.quote(f"{item.get('name', '')} {destination}")
         item["maps_url"] = f"https://www.google.com/maps/search/?api=1&query={query}"
+    return items
+
+
+# Curated, verified-loadable Unsplash photos, one per category, used as
+# representative stock images since the AI can't provide real place photos.
+PHOTOS = {
+    "fine dining": {
+        "url": "https://images.unsplash.com/photo-1766832255363-c9f060ade8b0?fm=jpg&q=70&w=1200&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
+        "credit_name": "Tanja Tepavac",
+        "credit_url": "https://unsplash.com/photos/elegant-dining-tables-set-in-a-cozy-restaurant-interior-jSH-7IjJVsQ",
+    },
+    "wine bar": {
+        "url": "https://images.unsplash.com/photo-1761330439476-3d4abe0f7a53?fm=jpg&q=70&w=1200&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
+        "credit_name": "Caroline Badran",
+        "credit_url": "https://unsplash.com/photos/shelving-unit-with-wine-bottles-and-glassware-QLIrD78v9_E",
+    },
+    "cafe": {
+        "url": "https://images.unsplash.com/photo-1752756992329-961db6366376?fm=jpg&q=70&w=1200&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
+        "credit_name": "Haberdoedas",
+        "credit_url": "https://unsplash.com/photos/a-cozy-coffee-shop-interior-with-a-menu-_yJXuiFdsPo",
+    },
+    "seafood": {
+        "url": "https://images.unsplash.com/photo-1765100479761-2359e22fbe16?fm=jpg&q=70&w=1200&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
+        "credit_name": "Vitalii Kyktov",
+        "credit_url": "https://unsplash.com/photos/a-platter-of-assorted-seafood-with-mussels-and-shrimp-2xd9c6jQhGs",
+    },
+    "tapas": {
+        "url": "https://images.unsplash.com/photo-1781115650865-6e29104a7edd?fm=jpg&q=70&w=1200&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
+        "credit_name": "Paul",
+        "credit_url": "https://unsplash.com/photos/delicious-spanish-pintxos-and-tapas-displayed-on-a-counter-I6VLaTNCs9I",
+    },
+    "market": {
+        "url": "https://images.unsplash.com/photo-1761289731268-900eba5cf09f?fm=jpg&q=70&w=1200&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
+        "credit_name": "Bernd Dittrich",
+        "credit_url": "https://unsplash.com/photos/colorful-spices-and-dried-goods-displayed-at-a-market-stall-hvgiElA441A",
+    },
+    "walking tour": {
+        "url": "https://images.unsplash.com/photo-1680205415325-3ceebea06319?fm=jpg&q=70&w=1200&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
+        "credit_name": "Paulina Bargielska",
+        "credit_url": "https://unsplash.com/photos/a-cobblestone-street-in-an-old-city-PJRgaZmckF0",
+    },
+    "museum": {
+        "url": "https://images.unsplash.com/photo-1761403757058-e3c95b662a89?fm=jpg&q=70&w=1200&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
+        "credit_name": "Julia Taubitz",
+        "credit_url": "https://unsplash.com/photos/modern-museum-interior-with-spiraling-ramps-and-atrium-BJnv18pmmBk",
+    },
+    "viewpoint": {
+        "url": "https://images.unsplash.com/photo-1732494644033-fedc311f0442?fm=jpg&q=70&w=1200&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
+        "credit_name": "Kellen Riggin",
+        "credit_url": "https://unsplash.com/photos/an-aerial-view-of-a-city-at-sunset-105M1xsnV4o",
+    },
+    "nightlife": {
+        "url": "https://images.unsplash.com/photo-1771850081567-22d494c9aca8?fm=jpg&q=70&w=1200&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
+        "credit_name": "ayumi kubo",
+        "credit_url": "https://unsplash.com/photos/a-busy-city-street-at-night-with-neon-lights-mYtL05HFNG8",
+    },
+    "cooking class": {
+        "url": "https://images.unsplash.com/photo-1638446081329-aa6003de5800?fm=jpg&q=70&w=1200&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
+        "credit_name": "Nita Payne",
+        "credit_url": "https://unsplash.com/photos/4kymbla9ZIw",
+    },
+    "beach": {
+        "url": "https://images.unsplash.com/photo-1746131272890-6f7f2678743c?fm=jpg&q=70&w=1200&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
+        "credit_name": "Adam Juman",
+        "credit_url": "https://unsplash.com/photos/beautiful-beach-with-turquoise-water-and-palm-trees-0JaiQiU5bgw",
+    },
+}
+
+
+def add_photos(items, item_type):
+    fallback = PHOTOS["cafe"] if item_type == "restaurant" else PHOTOS["viewpoint"]
+    for item in items:
+        category = str(item.get("category", "")).strip().lower()
+        photo = PHOTOS.get(category, fallback)
+        item["photo_url"] = photo["url"]
+        item["photo_credit_name"] = photo["credit_name"]
+        item["photo_credit_url"] = photo["credit_url"]
     return items
 
 
@@ -204,11 +290,13 @@ class Handler(BaseHTTPRequestHandler):
             )
             return
 
-        parsed["restaurants"] = add_maps_links(
-            parsed.get("restaurants", []), trip["destination"]
+        parsed["restaurants"] = add_photos(
+            add_maps_links(parsed.get("restaurants", []), trip["destination"]),
+            "restaurant",
         )
-        parsed["activities"] = add_maps_links(
-            parsed.get("activities", []), trip["destination"]
+        parsed["activities"] = add_photos(
+            add_maps_links(parsed.get("activities", []), trip["destination"]),
+            "activity",
         )
 
         self._send_json(200, parsed)
