@@ -25,3 +25,23 @@
 4. **Verify changes:** Run relevant checks. For a reproducible logic bug, use a failing test to demonstrate the fix when practical. Record manual checks and known limitations; follow the selected Build 4 evaluation track.
 5. **Zero secrets in code:** Never hardcode API keys, tokens, or credentials. Always read from environment variables (`.env`) and update `.env.example` when new variables are needed.
 6. **Stop when looping:** If a fix fails twice in a row, stop, summarize what failed, and ask the human before trying a third approach.
+
+## 4. Shipping (Deploying to Render)
+
+Fernweh deploys as a single Render **Web Service** on the Beginner lane — no Dockerfile, no `requirements.txt`, since it only uses Python's standard library.
+
+1. Push your latest commits to GitHub (Render deploys from the repo).
+2. Go to [render.com](https://render.com) and sign up / log in (GitHub login is fastest).
+3. Click **New +** → **Web Service**, then connect your GitHub account and pick this repo (`aj5063-Fernweh`).
+4. Fill in the service settings:
+   - **Language/Runtime:** Python 3
+   - **Build Command:** leave blank (there's nothing to install)
+   - **Start Command:** `python3 app.py`
+   - **Instance Type:** the free/Beginner tier
+5. Under the **Environment** tab, add two environment variables (never commit these — they live only in Render's dashboard):
+   - `OPENROUTER_API_KEY` — your real OpenRouter key
+   - `OPENROUTER_MODEL` — the model you're using (e.g. the same value as in your local `.env`)
+6. Click **Create Web Service**. Render builds and starts the app automatically, and sets its own `PORT` environment variable — `app.py` already reads `PORT` (defaulting to 8000 locally) and binds to `0.0.0.0`, so no code changes are needed per deploy.
+7. Once it's live, Render gives you a public URL like `https://fernweh-xxxx.onrender.com`. Open it and run through the trip-planning flow once to confirm it works end to end.
+8. **Beginner-lane heads-up:** the free tier spins the service down after a period of inactivity. The first request after it's been idle can take up to ~30–60 seconds to "wake up" — that's expected, not a bug.
+9. To redeploy after future changes, just push to GitHub — Render auto-deploys on new commits to the connected branch.

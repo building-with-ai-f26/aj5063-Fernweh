@@ -1,17 +1,20 @@
-"""Build 2 local web app for Fernweh.
+"""Build 3 local/deployed web app for Fernweh.
 
-Serves a single-page form at http://localhost:8000. The browser posts trip
-details + friend profiles to /plan-trip; this server calls OpenRouter (the
-API key stays here, never sent to the browser) and returns 8 restaurants
-and 8 activities as JSON for the page to render as cards.
+Serves a single-page form. The browser posts trip details + friend profiles
+to /plan-trip; this server calls OpenRouter (the API key stays here, never
+sent to the browser) and returns 8 restaurants and 8 activities as JSON for
+the page to render as cards.
 
-Run: python3 app.py
-Needs OPENROUTER_API_KEY and OPENROUTER_MODEL set in .env (see .env.example).
+Local run: python3 app.py (needs OPENROUTER_API_KEY and OPENROUTER_MODEL in
+.env — see .env.example). Deployed (e.g. Render): same two variables are set
+as real environment variables in the hosting dashboard instead of a .env
+file; see the "Shipping" section in AGENTS.md.
 """
 
 import json
 import os
 import re
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -19,8 +22,19 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 ENV_PATH = ".env"
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-PORT = 8000
 STATIC_FILE = os.path.join("static", "index.html")
+
+# Abuse / cost protection: a per-IP rate limit and hard caps on input sizes,
+# since every request costs real money via the OpenRouter API.
+RATE_LIMIT_WINDOW_SECONDS = 60
+RATE_LIMIT_MAX_REQUESTS = 10
+MAX_BODY_BYTES = 20_000
+MAX_TEXT_FIELD_LENGTH = 200
+MAX_FRIEND_PROFILE_LENGTH = 600
+
+# ip -> list of request timestamps. The server is single-threaded
+# (HTTPServer, not ThreadingHTTPServer), so this needs no lock.
+_request_log = {}
 
 CATEGORIES = [
     "fine dining", "wine bar", "cafe", "seafood", "tapas", "market",
@@ -61,10 +75,9 @@ exactly this shape:
 
 def load_env(path):
     if not os.path.exists(path):
-        raise SystemExit(
-            f"No {path} file found. Run `cp .env.example .env` and add your "
-            "OpenRouter API key first."
-        )
+        # No .env file — fine when deployed, where OPENROUTER_API_KEY and
+        # OPENROUTER_MODEL are set as real environment variables instead.
+        return
     with open(path) as f:
         for line in f:
             line = line.strip()
@@ -120,6 +133,24 @@ def build_user_content(trip):
     for i, profile in enumerate(trip["friends"], start=1):
         lines.append(f"Friend {i}: {profile}")
     return "\n".join(lines)
+
+
+def get_client_ip(handler):
+    forwarded = handler.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return handler.client_address[0]
+
+
+def check_rate_limit(ip):
+    now = time.time()
+    recent = [t for t in _request_log.get(ip, []) if now - t < RATE_LIMIT_WINDOW_SECONDS]
+    if len(recent) >= RATE_LIMIT_MAX_REQUESTS:
+        _request_log[ip] = recent
+        return False
+    recent.append(now)
+    _request_log[ip] = recent
+    return True
 
 
 def add_maps_links(items, destination):
@@ -234,7 +265,21 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             return
 
+        if not check_rate_limit(get_client_ip(self)):
+            self._send_json(
+                429,
+                {
+                    "error": "You're planning trips a little too fast — "
+                    "please wait a minute and try again."
+                },
+            )
+            return
+
         length = int(self.headers.get("Content-Length", 0))
+        if length > MAX_BODY_BYTES:
+            self._send_json(413, {"error": "That request is too large."})
+            return
+
         try:
             trip = json.loads(self.rfile.read(length))
         except json.JSONDecodeError:
@@ -247,9 +292,25 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json(400, {"error": f"Missing fields: {', '.join(missing)}"})
             return
 
+        for field in ("destination", "dates", "group_size", "budget", "vibe"):
+            if len(str(trip[field])) > MAX_TEXT_FIELD_LENGTH:
+                self._send_json(
+                    400,
+                    {"error": f"{field.replace('_', ' ').title()} is too long "
+                              f"(max {MAX_TEXT_FIELD_LENGTH} characters)."},
+                )
+                return
+
         friends = trip["friends"]
         if not isinstance(friends, list) or not (2 <= len(friends) <= 6):
             self._send_json(400, {"error": "Enter between 2 and 6 friend profiles."})
+            return
+        if any(len(str(f)) > MAX_FRIEND_PROFILE_LENGTH for f in friends):
+            self._send_json(
+                400,
+                {"error": f"Each friend profile must be under "
+                          f"{MAX_FRIEND_PROFILE_LENGTH} characters."},
+            )
             return
 
         api_key = os.environ.get("OPENROUTER_API_KEY", "")
@@ -307,8 +368,9 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     load_env(ENV_PATH)
-    server = HTTPServer(("localhost", PORT), Handler)
-    print(f"Fernweh running at http://localhost:{PORT}")
+    port = int(os.environ.get("PORT", 8000))
+    server = HTTPServer(("0.0.0.0", port), Handler)
+    print(f"Fernweh running on port {port}")
     server.serve_forever()
 
 
