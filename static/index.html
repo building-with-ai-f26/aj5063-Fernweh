@@ -774,9 +774,14 @@
       card.querySelector(".maps-link").href = item.maps_url || "#";
       const creditEl = card.querySelector(".photo-credit-line");
       if (item.photo_credit_name && item.photo_credit_url) {
-        creditEl.innerHTML =
-          'Photo by <a href="' + item.photo_credit_url + '" target="_blank" rel="noopener">' +
-          item.photo_credit_name + '</a> on Unsplash';
+        creditEl.appendChild(document.createTextNode("Photo by "));
+        const creditLink = document.createElement("a");
+        creditLink.href = item.photo_credit_url;
+        creditLink.target = "_blank";
+        creditLink.rel = "noopener";
+        creditLink.textContent = item.photo_credit_name;
+        creditEl.appendChild(creditLink);
+        creditEl.appendChild(document.createTextNode(" on Unsplash"));
       }
 
       const upBtn = card.querySelector(".vote-up");

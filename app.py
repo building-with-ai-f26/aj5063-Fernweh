@@ -24,17 +24,29 @@ ENV_PATH = ".env"
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 STATIC_FILE = os.path.join("static", "index.html")
 
-# Abuse / cost protection: a per-IP rate limit and hard caps on input sizes,
-# since every request costs real money via the OpenRouter API.
+# Abuse / cost protection: a per-IP rate limit, a global backstop, and hard
+# caps on input sizes, since every request costs real money via the
+# OpenRouter API.
+#
+# The per-IP limit keys off X-Forwarded-For, which a client can send with
+# any value it likes — on platforms that APPEND the real client IP as the
+# last hop (Render does this), the last entry is trustworthy; the first
+# entry is not, since it's whatever the client put there. Because we can't
+# fully verify that assumption for every possible host, MAX_GLOBAL_REQUESTS
+# is a hard ceiling on total requests across all callers combined, so even a
+# fully spoofed per-IP bypass can't drive unbounded cost.
 RATE_LIMIT_WINDOW_SECONDS = 60
 RATE_LIMIT_MAX_REQUESTS = 10
+MAX_GLOBAL_REQUESTS_PER_WINDOW = 30
 MAX_BODY_BYTES = 20_000
 MAX_TEXT_FIELD_LENGTH = 200
 MAX_FRIEND_PROFILE_LENGTH = 600
 
-# ip -> list of request timestamps. The server is single-threaded
-# (HTTPServer, not ThreadingHTTPServer), so this needs no lock.
+# ip -> list of request timestamps, plus one shared list for the global cap.
+# The server is single-threaded (HTTPServer, not ThreadingHTTPServer), so
+# this needs no lock.
 _request_log = {}
+_global_request_log = []
 
 CATEGORIES = [
     "fine dining", "wine bar", "cafe", "seafood", "tapas", "market",
@@ -138,8 +150,21 @@ def build_user_content(trip):
 def get_client_ip(handler):
     forwarded = handler.headers.get("X-Forwarded-For")
     if forwarded:
-        return forwarded.split(",")[0].strip()
+        # Last hop: the IP the trusted proxy (e.g. Render) itself observed,
+        # not the first entry, which the client can set to anything.
+        return forwarded.split(",")[-1].strip()
     return handler.client_address[0]
+
+
+def check_global_rate_limit():
+    now = time.time()
+    recent = [t for t in _global_request_log if now - t < RATE_LIMIT_WINDOW_SECONDS]
+    if len(recent) >= MAX_GLOBAL_REQUESTS_PER_WINDOW:
+        _global_request_log[:] = recent
+        return False
+    recent.append(now)
+    _global_request_log[:] = recent
+    return True
 
 
 def check_rate_limit(ip):
@@ -238,6 +263,10 @@ def add_photos(items, item_type):
 
 
 class Handler(BaseHTTPRequestHandler):
+    # Avoid leaking the exact Python/http.server version to the world.
+    def version_string(self):
+        return "Fernweh"
+
     def _send_json(self, status, payload):
         body = json.dumps(payload).encode("utf-8")
         self.send_response(status)
@@ -263,6 +292,16 @@ class Handler(BaseHTTPRequestHandler):
         if self.path != "/plan-trip":
             self.send_response(404)
             self.end_headers()
+            return
+
+        if not check_global_rate_limit():
+            self._send_json(
+                429,
+                {
+                    "error": "Fernweh is getting a lot of requests right now — "
+                    "please wait a minute and try again."
+                },
+            )
             return
 
         if not check_rate_limit(get_client_ip(self)):
@@ -293,7 +332,13 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         for field in ("destination", "dates", "group_size", "budget", "vibe"):
-            if len(str(trip[field])) > MAX_TEXT_FIELD_LENGTH:
+            value = trip[field]
+            if not isinstance(value, str):
+                self._send_json(
+                    400, {"error": f"{field.replace('_', ' ').title()} must be text."}
+                )
+                return
+            if len(value) > MAX_TEXT_FIELD_LENGTH:
                 self._send_json(
                     400,
                     {"error": f"{field.replace('_', ' ').title()} is too long "
@@ -305,7 +350,10 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(friends, list) or not (2 <= len(friends) <= 6):
             self._send_json(400, {"error": "Enter between 2 and 6 friend profiles."})
             return
-        if any(len(str(f)) > MAX_FRIEND_PROFILE_LENGTH for f in friends):
+        if not all(isinstance(f, str) for f in friends):
+            self._send_json(400, {"error": "Each friend profile must be text."})
+            return
+        if any(len(f) > MAX_FRIEND_PROFILE_LENGTH for f in friends):
             self._send_json(
                 400,
                 {"error": f"Each friend profile must be under "
